@@ -3,6 +3,7 @@
 
 Ce projet est une application simple de gestion des comptes bancaires. Il utilise **Spring Boot** pour le backend et **React** pour le frontend.
 
+---
 
 ## **Fonctionnalités**
 - Affichage de la liste des comptes bancaires.
@@ -10,7 +11,9 @@ Ce projet est une application simple de gestion des comptes bancaires. Il utilis
 - Modification des comptes existants.
 - Suppression de comptes.
 - Interface utilisateur moderne et intuitive avec React.
+- **Base de données H2 en mémoire** pour faciliter les tests.
 
+---
 
 ## **Structure du projet**
 
@@ -54,16 +57,47 @@ Le frontend est écrit en React et intégré directement dans un fichier HTML. I
      spring.jpa.hibernate.ddl-auto=update
      ```
 
-3. **Lancez l'application :**
-   - À la racine du projet, exécutez la commande suivante :
+2. **Lancez l'application :**
+   - À la racine du projet, exécutez la commande suivante ou manuellement :
      ```bash
      mvn spring-boot:run
      ```
 
    - Cela démarre le backend sur le port **8082**.
 
-4. **Accédez à l'application :**
+3. **Accédez à l'application :**
    - Ouvrez un navigateur et rendez-vous sur **[http://localhost:8082](http://localhost:8082)**.
+
+
+## **Tester la base de données avec H2 Console**
+
+H2 est une base de données en mémoire intégrée qui facilite les tests sans nécessiter de configuration supplémentaire.
+
+1. **Accédez à la console H2 :**
+   - Ouvrez un navigateur et rendez-vous sur **[http://localhost:8082/h2-console](http://localhost:8082/h2-console)**.
+
+2. **Configuration de connexion :**
+   - **JDBC URL** : `jdbc:h2:mem:banque`
+   - **Username** : `sa`
+   - **Password** : *(laisser vide)*
+
+3. **Exécutez des requêtes SQL :**
+   - Après connexion, vous pouvez exécuter des requêtes SQL directement dans la console pour vérifier l'état de la base.
+   - Par exemple :
+     ```sql
+     SELECT * FROM compte;
+     ```
+     Cela affichera tous les comptes enregistrés dans la base.
+
+4. **Ajouter ou modifier des données directement :**
+   - Vous pouvez également insérer ou mettre à jour des données :
+     ```sql
+     INSERT INTO compte (solde, date_creation, type) VALUES (5000, '2024-11-20', 'EPARGNE');
+     UPDATE compte SET solde = 6000 WHERE id = 1;
+     ```
+
+   - Ces modifications seront immédiatement disponibles dans l'application.
+
 
 ## **Utilisation**
 
@@ -86,6 +120,8 @@ Le frontend est écrit en React et intégré directement dans un fichier HTML. I
 5. **Supprimer un compte :**
    - Cliquez sur **Supprimer** pour effacer un compte.
 
+---
+
 ## **Technologies utilisées**
 
 - **Backend :**
@@ -96,3 +132,5 @@ Le frontend est écrit en React et intégré directement dans un fichier HTML. I
 
 - **Frontend :**
   - React (intégré via un fichier HTML)
+
+---
