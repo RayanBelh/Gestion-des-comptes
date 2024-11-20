@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion des Comptes</title>
+  <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+  <style>
+    /* Global styles */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f8ff;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    #root {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        max-width: 900px;
+        width: 100%;
+        padding: 20px;
+    }
+
+    h1, h2 {
+        text-align: center;
+        color: #264653;
+    }
+
+    button {
+        background-color: #2a9d8f;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+        margin: 5px;
+    }
+
+    button:hover {
+        background-color: #21867a;
+    }
+
+    .secondary-btn {
+        background-color: #e76f51;
+    }
+
+    .secondary-btn:hover {
+        background-color: #cf5c3b;
+    }
+
+    .form-container label {
+        display: block;
+        margin: 10px 0 5px;
+        font-weight: bold;
+        color: #264653;
+    }
+
+    .form-container input,
+    .form-container select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #a8dadc;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .table th, .table td {
+        border: 1px solid #d4e1ea;
+        text-align: left;
+        padding: 10px;
+    }
+
+    .table th {
+        background-color: #2a9d8f;
+        color: white;
+        font-weight: bold;
+    }
+
+    .table tr:nth-child(even) {
+        background-color: #f1faee;
+    }
+
+    .table tr:hover {
+        background-color: #e8f9f7;
+    }
+
+    .actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .center {
+        text-align: center;
+    }
+
+    .form-buttons {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .header {
+        margin-bottom: 20px;
+    }
+
+    .header h1 {
+        margin: 0;
+        font-size: 24px;
+    }
+
+    .header p {
+        margin: 5px 0 0;
+        color: #6c757d;
+        font-size: 14px;
+    }
+
+    .container {
+        max-width: 100%;
+        margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+  const { useState, useEffect } = React;
+
+  const App = () => {
+      const apiUrl = 'http://localhost:8082/banque/comptes';
+
+      const [page, setPage] = useState('home');
+      const [accounts, setAccounts] = useState([]);
+      const [newAccount, setNewAccount] = useState({
+          id: null,
+          solde: '',
+          dateCreation: '',
+          type: 'EPARGNE',
+      });
+
+      const fetchAccounts = () => {
+          fetch(apiUrl)
+              .then(response => response.json())
+              .then(data => setAccounts(data))
+              .catch(error => console.error('Erreur lors de la récupération des comptes:', error));
+      };
+
+      const addAccount = (e) => {
+          e.preventDefault();
+          fetch(apiUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(newAccount),
+          })
+              .then(() => {
+                  alert('Compte ajouté avec succès');
+                  resetForm();
+                  setPage('list');
+                  fetchAccounts();
+              })
+              .catch(error => console.error('Erreur lors de l\'ajout du compte:', error));
+      };
+
+      const updateAccount = (e) => {
+          e.preventDefault();
+          fetch(`${apiUrl}/${newAccount.id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(newAccount),
+          })
+              .then(() => {
+                  alert('Compte modifié avec succès');
+                  resetForm();
+                  setPage('list');
+                  fetchAccounts();
+              })
+              .catch(error => console.error('Erreur lors de la modification du compte:', error));
+      };
+
+      const deleteAccount = (id) => {
+          fetch(`${apiUrl}/${id}`, { method: 'DELETE' })
+              .then(() => {
+                  alert('Compte supprimé avec succès');
+                  fetchAccounts();
+              })
+              .catch(error => console.error('Erreur lors de la suppression du compte:', error));
+      };
+
+      const editAccount = (account) => {
+          setNewAccount(account);
+          setPage('edit');
+      };
+
+      const resetForm = () => {
+          setNewAccount({ id: null, solde: '', dateCreation: '', type: 'EPARGNE' });
+      };
+
+      useEffect(() => {
+          if (page === 'list') fetchAccounts();
+      }, [page]);
+
+      return (
+          <div>
+              {page === 'home' && (
+                  <div>
+                      <h1>Bienvenue dans l'application de gestion des comptes bancaires</h1>
+                      <div className="center">
+                          <button onClick={() => setPage('list')}>Voir la liste des comptes</button>
+                      </div>
+                  </div>
+              )}
+
+              {page === 'list' && (
+                  <div>
+                      <h2>Liste des Comptes</h2>
+                      <div className="center">
+                          <button onClick={() => setPage('add')}>Ajouter un compte</button>
+                      </div>
+                      <table className="table">
+                          <thead>
+                              <tr>
+                                  <th>ID</th>
+                                  <th>Solde</th>
+                                  <th>Date de création</th>
+                                  <th>Type</th>
+                                  <th>Actions</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              {accounts.map(account => (
+                                  <tr key={account.id}>
+                                      <td>{account.id}</td>
+                                      <td>{account.solde}</td>
+                                      <td>{account.dateCreation}</td>
+                                      <td>{account.type}</td>
+                                      <td className="actions">
+                                          <button onClick={() => editAccount(account)}>Modifier</button>
+                                          <button className="secondary-btn" onClick={() => deleteAccount(account.id)}>Supprimer</button>
+                                      </td>
+                                  </tr>
+                              ))}
+                          </tbody>
+                      </table>
+                      <div className="center">
+                          <button className="secondary-btn" onClick={() => setPage('home')}>Retour à l'accueil</button>
+                      </div>
+                  </div>
+              )}
+
+              {(page === 'add' || page === 'edit') && (
+                  <div className="form-container">
+                      <h2>{page === 'add' ? 'Ajouter un Compte' : 'Modifier un Compte'}</h2>
+                      <form onSubmit={page === 'add' ? addAccount : updateAccount}>
+                          <label>Solde:</label>
+                          <input
+                              type="number"
+                              value={newAccount.solde}
+                              onChange={(e) => setNewAccount({ ...newAccount, solde: e.target.value })}
+                              required
+                          />
+                          <label>Date de création:</label>
+                          <input
+                              type="date"
+                              value={newAccount.dateCreation}
+                              onChange={(e) => setNewAccount({ ...newAccount, dateCreation: e.target.value })}
+                              required
+                          />
+                          <label>Type:</label>
+                          <select
+                              value={newAccount.type}
+                              onChange={(e) => setNewAccount({ ...newAccount, type: e.target.value })}
+                          >
+                              <option value="EPARGNE">Épargne</option>
+                              <option value="COURANT">Courant</option>
+                          </select>
+                          <div className="form-buttons">
+                              <button type="submit">{page === 'add' ? 'Ajouter' : 'Mettre à jour'}</button>
+                              <button className="secondary-btn" onClick={() => { resetForm(); setPage('list'); }}>Annuler</button>
+                          </div>
+                      </form>
+                  </div>
+              )}
+          </div>
+      );
+  };
+
+  ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+</body>
+</html>
